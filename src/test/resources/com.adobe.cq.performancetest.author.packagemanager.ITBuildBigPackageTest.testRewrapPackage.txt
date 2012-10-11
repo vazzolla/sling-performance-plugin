@@ -1,0 +1,2 @@
+Test Suite                              |Test Class                                                                      |Test Method                             |      DateTime      |  min  |   10%   |   50%   |   90%   |   max
+TS1-5.5.0-R2                            |com.adobe.cq.performancetest.author.packagemanager.ITBuildBigPackageTest        |testRewrapPackage                       |2012/10/04 17:02:51 |     92|       92|      829|     1559|     1559
