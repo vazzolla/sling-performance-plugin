@@ -86,6 +86,7 @@ public class SlingTextFormatReportParser extends GenericReportParser {
 					}
 					else
 					{
+						sample.setSuccessful(false);
 						parsingFailed = true;
 					}
 			}	
@@ -98,6 +99,7 @@ public class SlingTextFormatReportParser extends GenericReportParser {
 			}
 			else
 			{
+				r.addSample(sample);
 				logger.println("Performance: Parsing Sling Performance report file " + f.getName() + " failed");
 			}
 		}

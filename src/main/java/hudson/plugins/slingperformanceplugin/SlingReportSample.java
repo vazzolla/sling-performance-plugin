@@ -80,10 +80,6 @@ public class SlingReportSample implements Comparable<SlingReportSample> {
     public void setDate(Date time) {
     	this.date = time;
     }
-
-    public void setUri(String uri) {
-    	this.uri = uri;
-    }
   
     public int compareTo(SlingReportSample o) {
     	return (int) (getMedian() - o.getMedian());

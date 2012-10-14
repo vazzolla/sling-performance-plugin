@@ -6,10 +6,15 @@
     <version>1.466</version><!-- which version of Jenkins is this plugin built against? -->
   </parent>
 
-  <artifactId>slingplugin</artifactId>
+  <artifactId>slingperformance</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
+  <name>Sling Performance Framework plugin </name>
+  <scm>
+  	<connection>scm:git:git://git.corp.adobe.com:vazzolla/cq-performance-tests-new.git</connection>
+  	<developerConnection>scm:git:git@git.corp.adobe.com:vazzolla/cq-performance-tests-new.git</developerConnection>
+  </scm>
   <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
   <repositories>
     <repository>
@@ -66,5 +71,4 @@
   		</plugins>
   	</pluginManagement>
   </build>
-  <name>Sling Performance Framework plugin </name>
 </project>

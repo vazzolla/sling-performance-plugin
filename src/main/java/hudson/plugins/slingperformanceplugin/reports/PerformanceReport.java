@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Represents a single performance report, which consists of multiple {@link UriReport}s for
+ * Represents a single performance report, which consists of multiple {@link TestRunReport}s for
  * different URLs that was tested.
  *
  * This object belongs under {@link SlingPerformanceReportMap}.
@@ -30,9 +30,9 @@ public class PerformanceReport extends AbstractReport implements
  
 
   /**
-   * {@link UriReport}s keyed by their {@link UriReport#getStaplerUri()}.
+   * {@link TestRunReport}s keyed by their {@link TestRunReport#getStaplerUri()}.
    */
-  private final Map<String, UriReport> testReportMap = new LinkedHashMap<String, UriReport>();
+  private final Map<String, TestRunReport> testReportMap = new LinkedHashMap<String, TestRunReport>();
   
   private PerformanceReport lastBuildReport;
 
@@ -42,16 +42,13 @@ public class PerformanceReport extends AbstractReport implements
       return;
     }
     
-    
-    
-    UriReport uriReport = testReportMap.get(testName);
+    TestRunReport uriReport = testReportMap.get(testName);
     
     if (uriReport == null) {
-      uriReport = new UriReport(this, testName, uri);
+      uriReport = new TestRunReport(this);
       testReportMap.put(testName, uriReport);
     }
     uriReport.addReportSample(pReportSample);
-    
   }
 
   public int compareTo(PerformanceReport jmReport) {
@@ -62,24 +59,7 @@ public class PerformanceReport extends AbstractReport implements
   }
 
   public long getMedian() {
-    
-	  
-	long result = 0;
-	
-	/*
-	
-    int size = size();
-    if (size != 0) {
-      long average = 0;
-      List<SlingReportSample> allSamples = new ArrayList<SlingReportSample>();
-      for (UriReport currentReport : uriReportMap.values()) {
-        allSamples.addAll(currentReport.getHttpSampleList());
-      }
-      Collections.sort(allSamples);
-      result = allSamples.get((int) (allSamples.size() * .5)).getMedian();
-    }*/
-    
-    return result;
+    return this.reportSample.getMedian();
   }
   
   public AbstractBuild<?, ?> getBuild() {
@@ -94,7 +74,7 @@ public class PerformanceReport extends AbstractReport implements
     return Messages.Report_DisplayName();
   }
 
-  public UriReport getDynamic(String token) throws IOException {
+  public TestRunReport getDynamic(String token) throws IOException {
     return getUriReportMap().get(token);
   }
 
@@ -103,32 +83,24 @@ public class PerformanceReport extends AbstractReport implements
   }
 
   public long getMax() {
-    long max = Long.MIN_VALUE;
-    for (UriReport currentReport : testReportMap.values()) {
-      max = Math.max(currentReport.getMax(), max);
-    }
-    return max;
+	  return this.reportSample.getMax();
   }
 
   public long getMin() {
-    long min = Long.MAX_VALUE;
-    for (UriReport currentReport : testReportMap.values()) {
-      min = Math.min(currentReport.getMin(), min);
-    }
-    return min;
+    return this.reportSample.getMin();
   }
 
   public String getReportFileName() {
     return reportFileName;
   }
 
-  public List<UriReport> getUriListOrdered() {
-    Collection<UriReport> uriCollection = getUriReportMap().values();
-    List<UriReport> UriReportList = new ArrayList<UriReport>(uriCollection);
+  public List<TestRunReport> getUriListOrdered() {
+    Collection<TestRunReport> uriCollection = getUriReportMap().values();
+    List<TestRunReport> UriReportList = new ArrayList<TestRunReport>(uriCollection);
     return UriReportList;
   }
 
-  public Map<String, UriReport> getUriReportMap() {
+  public Map<String, TestRunReport> getUriReportMap() {
     return testReportMap;
   }
 
@@ -146,10 +118,10 @@ public class PerformanceReport extends AbstractReport implements
 
   
   
-  public void setLastBuildReport( PerformanceReport lastBuildReport ) {
-    Map<String, UriReport> lastBuildUriReportMap = lastBuildReport.getUriReportMap();
-    for (Map.Entry<String, UriReport> item : testReportMap.entrySet()) {
-        UriReport lastBuildUri = lastBuildUriReportMap.get( item.getKey() );
+  /*public void setLastBuildReport( PerformanceReport lastBuildReport ) {
+    Map<String, TestRunReport> lastBuildUriReportMap = lastBuildReport.getUriReportMap();
+    for (Map.Entry<String, TestRunReport> item : testReportMap.entrySet()) {
+        TestRunReport lastBuildUri = lastBuildUriReportMap.get( item.getKey() );
         if ( lastBuildUri != null ) {
             item.getValue().addLastBuildUriReport( lastBuildUri );
         } else {
@@ -157,7 +129,7 @@ public class PerformanceReport extends AbstractReport implements
     }
     this.lastBuildReport = lastBuildReport;
   }
-  
+  */
  
   
   public long getMedianDiff() {

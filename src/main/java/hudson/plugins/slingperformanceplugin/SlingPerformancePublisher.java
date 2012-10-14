@@ -43,7 +43,7 @@ public class SlingPerformancePublisher extends Recorder {
 
 		@Override
 		public String getHelpFile() {
-			return "/plugin/slingplugin/help.html";
+			return "/plugin/slingperformance/help.html";
 		}
 
 		public List<PerformanceReportParserDescriptor> getParserDescriptors() {
@@ -80,7 +80,7 @@ public class SlingPerformancePublisher extends Recorder {
 		return new File(build.getRootDir(),
 				SlingPerformanceReportMap.getPerformanceReportFileRelativePath(
 						parserDisplayName,
-						getPerformanceReportBuildFileName(performanceReportName)));
+						performanceReportName));
 	}
 
 	@Override
@@ -93,21 +93,6 @@ public class SlingPerformancePublisher extends Recorder {
 	}
 
   
-
-  /**
-   * <p>
-   * Delete the date suffix appended to the Performance result files by the
-   * Maven Performance plugin
-   * </p>
-   * 
-   * @param performanceReportWorkspaceName
-   * @return the name of the PerformanceReport in the Build
-   */
-  public static String getPerformanceReportBuildFileName(
-      String performanceReportWorkspaceName) {
-    return performanceReportWorkspaceName;
-  }
-
   /**
    * look for performance reports based in the configured parameter includes.
    * 'includes' is - an Ant-style pattern - a list of files and folders
@@ -116,7 +101,6 @@ public class SlingPerformancePublisher extends Recorder {
   protected static List<FilePath> locatePerformanceReports(FilePath workspace,
       String includes) throws IOException, InterruptedException {
    
-    //Agoley : Possible fix, if we specify more than one result file pattern
     try {
       String parts[] = includes.split("\\s*[;:,]+\\s*");
       List<FilePath> files = new ArrayList<FilePath>();
@@ -131,8 +115,6 @@ public class SlingPerformancePublisher extends Recorder {
     } catch (IOException e) {
     }
 
-    //Agoley:  seems like this block doesn't work    
-    // If it fails, do a legacy search
     ArrayList<FilePath> files = new ArrayList<FilePath>();
     String parts[] = includes.split("\\s*[;:,]+\\s*");
     for (String path : parts) {
@@ -152,9 +134,13 @@ public class SlingPerformancePublisher extends Recorder {
   public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,
       BuildListener listener) throws InterruptedException, IOException {
     
+	  if (build.getResult().isWorseOrEqualTo(Result.UNSTABLE)){
+		  return true;
+	  }
+	  
 	  PrintStream logger = listener.getLogger();
 	  
-	  logger.println("Performance: No condition configured for making the test " + Result.FAILURE.toString().toLowerCase());
+	  logger.println("Performance: No condition configured for making the build " + Result.FAILURE.toString().toLowerCase());
    
 	  // add the report to the build object.
 	  PerformanceBuildAction a = new PerformanceBuildAction(build, logger, parsers);

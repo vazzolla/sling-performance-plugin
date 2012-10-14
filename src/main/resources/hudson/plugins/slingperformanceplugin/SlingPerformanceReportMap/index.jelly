@@ -1,0 +1,17 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+	xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <l:layout xmlns:jm="/hudson/plugins/performance/tags" css="/plugin/performance/css/style.css">
+  <st:include it="${it.build}" page="sidepanel.jelly" />
+    <l:main-panel>
+      
+        <h2>${%Performance Breakdown by test name}</h2>
+        <j:forEach var="performanceReport" items="${it.getPerformanceListOrdered()}">
+         <h3>${performanceReport.getReportFileName()}</h3>
+         <h4>Median: ${it.getReportMedian(performanceReport.getReportFileName())}</h4>
+         <h4>Min:${it.getReportMin(performanceReport.getReportFileName())}</h4>
+         <h4>Max: ${it.getReportMax(performanceReport.getReportFileName())}</h4>
+         <hr/>
+      </j:forEach> 
+    </l:main-panel>
+  </l:layout>
+</j:jelly>

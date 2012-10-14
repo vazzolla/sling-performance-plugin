@@ -6,7 +6,7 @@ import hudson.model.AbstractBuild;
 import hudson.plugins.slingperformanceplugin.parsers.GenericReportParser;
 import hudson.plugins.slingperformanceplugin.parsers.SlingTextFormatReportParser;
 import hudson.plugins.slingperformanceplugin.reports.PerformanceReport;
-import hudson.plugins.slingperformanceplugin.reports.UriReport;
+import hudson.plugins.slingperformanceplugin.reports.TestRunReport;
 import hudson.util.ChartUtil;
 import hudson.util.ChartUtil.NumberOnlyBuildLabel;
 import hudson.util.DataSetBuilder;
@@ -119,12 +119,12 @@ public class SlingPerformanceReportMap implements ModelObject {
      *            "Performance report file name";"URI name"
      * @return
      */
-    public UriReport getUriReport(String uriReport) {
+    public TestRunReport getUriReport(String uriReport) {
         if (uriReport != null) {
             String uriReportDecoded;
             try {
                 uriReportDecoded = URLDecoder.decode(uriReport.replace(
-                        UriReport.END_PERFORMANCE_PARAMETER, ""), "UTF-8");
+                        TestRunReport.END_PERFORMANCE_PARAMETER, ""), "UTF-8");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
                 return null;
@@ -181,44 +181,19 @@ public class SlingPerformanceReportMap implements ModelObject {
     public boolean isFailed(String performanceReportName) {
         return getPerformanceReport(performanceReportName) == null;
     }
-
-    @SuppressWarnings("deprecation")
-	public void doRespondingTimeGraph(StaplerRequest request,
-            StaplerResponse response) throws IOException {
-    	
-        String parameter = request.getParameter("performanceReportPosition");
-        AbstractBuild<?, ?> previousBuild = getBuild();
-        final Map<AbstractBuild<?, ?>, Map<String, PerformanceReport>> buildReports = new LinkedHashMap<AbstractBuild<?, ?>, Map<String, PerformanceReport>>();
-        while (previousBuild != null) {
-            final AbstractBuild<?, ?> currentBuild = previousBuild;
-            parseReports(currentBuild, TaskListener.NULL, new PerformanceReportCollector() {
-
-                public void addAll(Collection<PerformanceReport> parse) {
-                    for (PerformanceReport performanceReport : parse) {
-                        if (buildReports.get(currentBuild) == null) {
-                            Map<String, PerformanceReport> map = new LinkedHashMap<String, PerformanceReport>();
-                            buildReports.put(currentBuild, map);
-                        }
-                        buildReports.get(currentBuild).put(performanceReport.getReportFileName(), performanceReport);
-                    }
-                }
-            }, parameter);
-            previousBuild = previousBuild.getPreviousBuild();
-        }
-        
-        //Now we should have the data necessary to generate the graphs!
-        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderMedian = new DataSetBuilder<String, NumberOnlyBuildLabel>();
-        for (AbstractBuild<?, ?> currentBuild : buildReports.keySet()) {
-            NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(currentBuild);
-            PerformanceReport report = buildReports.get(currentBuild).get(parameter);
-            //dataSetBuilderMedian.add(Long.valueOf(report.getMedian()), Messages._ProjectAction_Median(), label);
-        }
-        ChartUtil.generateGraph(request, response,
-                SlingPerformanceProjectAction.createRespondingTimeChart(dataSetBuilderMedian.build()), 400, 200);
-    }
-
     
-
+    public long getReportMedian(String performanceReportName){
+    	return getPerformanceReport(performanceReportName).getMedian();
+    }
+    
+    public long getReportMin(String performanceReportName){
+    	return getPerformanceReport(performanceReportName).getMin();
+    }
+    
+    public long getReportMax(String performanceReportName){
+    	return getPerformanceReport(performanceReportName).getMax();
+    }
+    
     private void parseReports(AbstractBuild<?, ?> build, TaskListener listener, PerformanceReportCollector collector, final String filename) throws IOException {
         File repo = new File(build.getRootDir(),
                 SlingPerformanceReportMap.getPerformanceReportDirRelativePath());    
@@ -264,45 +239,8 @@ public class SlingPerformanceReportMap implements ModelObject {
                 }
             }
         }
-        
-        addPreviousBuildReports();
     }
     
-    private void addPreviousBuildReports() {
-        
-        // Avoid parsing all builds.
-        if ( SlingPerformanceReportMap.currentBuild == null ) {
-            SlingPerformanceReportMap.currentBuild = getBuild();
-        }else {
-            if( SlingPerformanceReportMap.currentBuild != getBuild() ) {
-                SlingPerformanceReportMap.currentBuild = null;
-                return;
-            }
-        }
-        
-        AbstractBuild<?, ?> previousBuild = getBuild().getPreviousBuild();
-        if ( previousBuild == null ) {
-            return;
-        }
-        
-        PerformanceBuildAction previousPerformanceAction = previousBuild.getAction(PerformanceBuildAction.class);
-        if ( previousPerformanceAction == null ) {
-            return;
-        }
-        
-        SlingPerformanceReportMap previousPerformanceReportMap = previousPerformanceAction.getPerformanceReportMap();
-        if (previousPerformanceReportMap == null) {
-            return;
-        }
-        
-        for (Map.Entry<String, PerformanceReport> item : getPerformanceReportMap().entrySet()) {
-            PerformanceReport lastReport = previousPerformanceReportMap.getPerformanceReportMap().get( item.getKey() );
-            if ( lastReport != null ) {
-                item.getValue().setLastBuildReport( lastReport );
-            }
-        }
-    }
-
     private interface PerformanceReportCollector {
 
         public void addAll(Collection<PerformanceReport> parse);

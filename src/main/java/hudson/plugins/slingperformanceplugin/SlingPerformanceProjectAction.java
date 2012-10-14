@@ -1,5 +1,9 @@
 package hudson.plugins.slingperformanceplugin;
 
+import hudson.matrix.Axis;
+import hudson.matrix.AxisList;
+import hudson.matrix.MatrixConfiguration;
+import hudson.matrix.MatrixProject;
 import hudson.model.Action;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -16,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
@@ -174,6 +179,52 @@ public final class SlingPerformanceProjectAction implements Action {
             createRespondingTimeChart(dataSetBuilderAverage.build()), 400, 200);
   }
 
+    
+    public void doRespondingTimeGraphMatrix(StaplerRequest request,
+    	      StaplerResponse response) throws IOException {
+    	
+    	PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+    	request.bindParameters(performanceReportPosition);
+    	
+    	String performanceReportNameFile = performanceReportPosition.getPerformanceReportPosition();
+    	if (performanceReportNameFile == null) {
+    		if (getPerformanceReportList().size() == 1) {
+    			performanceReportNameFile = getPerformanceReportList().get(0);
+    			} else {
+    				return;
+    			}
+    	    }
+    	
+    	if (ChartUtil.awtProblemCause != null) {
+    		// not available. send out error message
+    		response.sendRedirect2(request.getContextPath() + "/images/headless.png");
+    		return;
+    		}
+    	
+    	DataSetBuilder<String, String> dataSetBuilderAverage = new DataSetBuilder<String, String>();
+    	Collection<MatrixConfiguration> configs = ((MatrixProject)this.project).getActiveConfigurations();
+    	for (MatrixConfiguration config : configs)
+    	{
+    	
+    		PerformanceBuildAction performanceBuildAction = config.getLastBuild().getAction(PerformanceBuildAction.class);
+    		if (performanceBuildAction == null) {
+    			continue;
+    		}
+    		
+    		PerformanceReport performanceReport = performanceBuildAction.getPerformanceReportMap().getPerformanceReport(
+    				performanceReportNameFile);
+    		
+    		dataSetBuilderAverage.add(performanceReport.getMedian(),
+    	                Messages.ProjectAction_Median(), config.getDisplayName());
+    	           
+    	}
+    	
+    	ChartUtil.generateGraph(request, response,
+    			createRespondingTimeChart(dataSetBuilderAverage.build()), 400, 200);
+    	}
+    
+    
+    
 
   /**
    * <p>
@@ -249,6 +300,10 @@ public final class SlingPerformanceProjectAction implements Action {
   public AbstractProject<?, ?> getProject() {
     return project;
   }
+  
+  public String getLastBuild(){
+	  return this.project.getLastBuild().getDisplayName();
+  }
 
   public List<String> getPerformanceReportList() {
     this.performanceReportList = new ArrayList<String>(0);
@@ -258,23 +313,56 @@ public final class SlingPerformanceProjectAction implements Action {
     if (null == this.project.getSomeBuildWithWorkspace()) {
       return performanceReportList;
     }
-    File file = new File(this.project.getSomeBuildWithWorkspace().getRootDir(),
-        SlingPerformanceReportMap.getPerformanceReportDirRelativePath());
-    if (!file.isDirectory()) {
-      return performanceReportList;
-    }
+    
+    if (this.project instanceof MatrixProject){
+    	
+    	Collection<MatrixConfiguration> configs = ((MatrixProject)this.project).getActiveConfigurations();
+    	for (MatrixConfiguration config : configs){
+    		
+    		File file = new File(config.getSomeBuildWithWorkspace().getRootDir(),
+					SlingPerformanceReportMap.getPerformanceReportDirRelativePath());
+		    
+		    	if (!file.isDirectory()) {
+		    		return performanceReportList;
+		    	}
 
-    for (File entry : file.listFiles()) {
-      if (entry.isDirectory()) {
-        for (File e : entry.listFiles()) {
-          this.performanceReportList.add(e.getName());
-        }
-      } else {
-        this.performanceReportList.add(entry.getName());
-      }
-        
-    }
+		    	for (File entry : file.listFiles()) {
+		    		if (entry.isDirectory()) {
+		    			for (File e : entry.listFiles()) {
+		    				if (!this.performanceReportList.contains(e.getName())){
+		    					this.performanceReportList.add(e.getName());
+		    				}
+		    			}
+		    		} else {
+		    			if (!this.performanceReportList.contains(entry.getName())){
+		    				this.performanceReportList.add(entry.getName());
+		    			}
+		    		}
+		    	}
+    		
+    	}
+    } else {
+    
+	    File file = new File(this.project.getSomeBuildWithWorkspace().getRootDir(),
+	        SlingPerformanceReportMap.getPerformanceReportDirRelativePath());
+	    
+	    if (!file.isDirectory()) {
+	        return performanceReportList;
+	      }
+	
+	      for (File entry : file.listFiles()) {
+	        if (entry.isDirectory()) {
+	          for (File e : entry.listFiles()) {
+	            this.performanceReportList.add(e.getName());
+	          }
+	        } else {
+	          this.performanceReportList.add(entry.getName());
+	        }
+	          
+	      }
 
+    }
+    
     Collections.sort(performanceReportList);
 
     return this.performanceReportList;
@@ -306,10 +394,11 @@ public final class SlingPerformanceProjectAction implements Action {
    */
   public Object getDynamic(final String link, final StaplerRequest request,
       final StaplerResponse response) {
-    if (CONFIGURE_LINK.equals(link)) {
-      return createUserConfiguration(request);
-     
-    } else {
+	  if (CONFIGURE_LINK.equals(link)) {
+	      return createUserConfiguration(request);
+	    } else if (TRENDREPORT_LINK.equals(link)) {
+	      return createTrendReport(request);
+	    } else {
       return null;
     }
   }
@@ -325,6 +414,21 @@ public final class SlingPerformanceProjectAction implements Action {
     GraphConfigurationDetail graph = new GraphConfigurationDetail(project,
         PLUGIN_NAME, request);
     return graph;
+  }
+  
+  /**
+   * Creates a view to configure the trend graph for the current user.
+   * 
+   * @param request
+   *            Stapler request
+   * @return a view to configure the trend graph for the current user
+   */
+  private Object createTrendReport(final StaplerRequest request) {
+    String filename = getTrendReportFilename(request);
+    CategoryDataset dataSet = getTrendReportData(request, filename).build();
+    TrendReportDetail report = new TrendReportDetail(project, PLUGIN_NAME,
+        request, filename, dataSet);
+    return report;
   }
 
     
@@ -377,6 +481,10 @@ public final class SlingPerformanceProjectAction implements Action {
   
   public boolean ifSlingPerformanceParserUsed(String fileName){
 	  return true;
+  }
+  
+  public boolean ifMatrixProject(){
+	  return (this.project instanceof MatrixProject ? true : false);
   }
  
   public static class Range {
