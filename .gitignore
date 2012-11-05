@@ -1,0 +1,9 @@
+target
+.classpath
+.metadata
+.project
+.settings
+*.bak
+*.class
+generated
+work
