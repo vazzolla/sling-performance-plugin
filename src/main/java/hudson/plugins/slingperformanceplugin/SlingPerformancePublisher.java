@@ -134,7 +134,7 @@ public class SlingPerformancePublisher extends Recorder {
   public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,
       BuildListener listener) throws InterruptedException, IOException {
     
-	  if (build.getResult().isWorseOrEqualTo(Result.UNSTABLE)){
+	  if (build.getResult().isWorseThan(Result.UNSTABLE)){
 		  return true;
 	  }
 	  
