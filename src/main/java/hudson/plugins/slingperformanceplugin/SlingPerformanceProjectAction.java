@@ -3,6 +3,7 @@ package hudson.plugins.slingperformanceplugin;
 import hudson.matrix.Axis;
 import hudson.matrix.AxisList;
 import hudson.matrix.MatrixConfiguration;
+import hudson.matrix.MatrixRun;
 import hudson.matrix.MatrixProject;
 import hudson.model.Action;
 import hudson.model.AbstractBuild;
@@ -319,7 +320,18 @@ public final class SlingPerformanceProjectAction implements Action {
     	Collection<MatrixConfiguration> configs = ((MatrixProject)this.project).getActiveConfigurations();
     	for (MatrixConfiguration config : configs){
     		
-    		File file = new File(config.getSomeBuildWithWorkspace().getRootDir(),
+    		MatrixRun matrixRun = config.getSomeBuildWithWorkspace();
+    		if (matrixRun == null){
+    			return performanceReportList;
+    		}
+    		
+    		File rootDir = matrixRun.getRootDir();
+    		
+    		if (rootDir == null){
+    			return performanceReportList;
+    		}
+    		
+    		File file = new File(rootDir,
 					SlingPerformanceReportMap.getPerformanceReportDirRelativePath());
 		    
 		    	if (!file.isDirectory()) {
