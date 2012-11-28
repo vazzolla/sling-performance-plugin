@@ -15,15 +15,32 @@
              <j:when test="${it.ifMatrixProject()}">
              	<div class="title"><h1><center>${%Test file}: ${performanceReport} : ${it.lastBuild}</center></h1></div>
                 <a href="./respondingTimeGraphMatrix?width=900&amp;height=550&amp;performanceReportPosition=${performanceReport}" title="${%Click for larger image}">
-                <img class="trend" src="./respondingTimeGraphMatrix?width=300&amp;height=225&amp;performanceReportPosition=${performanceReport}" width="300" height="225" />
+                <img class="trend" src="./respondingTimeGraphMatrix?width=400&amp;height=325&amp;performanceReportPosition=${performanceReport}" width="400" height="325" />
                 </a>
              </j:when>
              <j:when test="${it.ifSlingPerformanceParserUsed(performanceReport)}">
                 <div class="title"><h1><center>${%Test file}: ${performanceReport}</center></h1></div>
-                <a href="./respondingTimeGraph?width=900&amp;height=550&amp;performanceReportPosition=${performanceReport}" title="${%Click for larger image}">
-                <img class="trend" src="./respondingTimeGraph?width=300&amp;height=225&amp;performanceReportPosition=${performanceReport}" width="300" height="225" />
+                <a href="./respondingTimeGraph?width=1000&amp;height=750&amp;performanceReportPosition=${performanceReport}" title="${%Click for larger image}">
+                <img class="trend" src="./respondingTimeGraph?width=400&amp;height=325&amp;performanceReportPosition=${performanceReport}" width="400" height="325" />
                 </a>
-                
+                <p>Click specific graph :</p>
+                <a href="./respondingTimeGraphMin?width=1000&amp;height=750&amp;performanceReportPosition=${performanceReport}" title="${%Click for larger image}">
+                Min | 
+                </a>
+                <a href="./respondingTimeGraphMax?width=1000&amp;height=750&amp;performanceReportPosition=${performanceReport}" title="${%Click for larger image}">
+                Max |
+                </a>
+                <a href="./respondingTimeGraphMedian?width=1000&amp;height=750&amp;performanceReportPosition=${performanceReport}" title="${%Click for larger image}">
+                Median |
+                </a>
+                <a href="./respondingTimeGraphPercentile10?width=1000&amp;height=750&amp;performanceReportPosition=${performanceReport}" title="${%Click for larger image}">
+                Percentile 10% |
+                </a>
+                <a href="./respondingTimeGraphPercentile90?width=1000&amp;height=750&amp;performanceReportPosition=${performanceReport}" title="${%Click for larger image}">
+                Percentile 90%
+                </a>
+                <br/>
+                <p>Click for statistics table:</p>
                 <center>
                     <a href="${from.urlName}trendReport?performanceReportPosition=${performanceReport}">${%Trend report}</a>
                 </center>

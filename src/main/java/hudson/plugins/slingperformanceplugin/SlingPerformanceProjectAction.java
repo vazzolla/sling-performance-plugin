@@ -128,7 +128,7 @@ public final class SlingPerformanceProjectAction implements Action {
   }
 
 
-    public void doRespondingTimeGraph(StaplerRequest request,
+    public void doRespondingTimeGraphMin(StaplerRequest request,
       StaplerResponse response) throws IOException {
     	PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
         request.bindParameters(performanceReportPosition);
@@ -169,8 +169,9 @@ public final class SlingPerformanceProjectAction implements Action {
               continue;
             }
             
-            dataSetBuilderAverage.add(performanceReport.getMedian(),
-                Messages.ProjectAction_Median(), label);
+            
+            dataSetBuilderAverage.add(performanceReport.getMin(),
+                    Messages.ProjectAction_Minimum(), label);
            
           }
           nbBuildsToAnalyze--;
@@ -179,7 +180,283 @@ public final class SlingPerformanceProjectAction implements Action {
         ChartUtil.generateGraph(request, response,
             createRespondingTimeChart(dataSetBuilderAverage.build()), 400, 200);
   }
+    
+    
+    public void doRespondingTimeGraphMedian(StaplerRequest request,
+    	      StaplerResponse response) throws IOException {
+    	    	PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+    	        request.bindParameters(performanceReportPosition);
+    	        String performanceReportNameFile = performanceReportPosition.getPerformanceReportPosition();
+    	        if (performanceReportNameFile == null) {
+    	          if (getPerformanceReportList().size() == 1) {
+    	            performanceReportNameFile = getPerformanceReportList().get(0);
+    	          } else {
+    	            return;
+    	          }
+    	        }
+    	        if (ChartUtil.awtProblemCause != null) {
+    	          // not available. send out error message
+    	          response.sendRedirect2(request.getContextPath() + "/images/headless.png");
+    	          return;
+    	        }
+    	        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+    	        List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();
+    	        Range buildsLimits = getFirstAndLastBuild(request, builds);
 
+    	        int nbBuildsToAnalyze = builds.size();
+    	        for (AbstractBuild<?, ?> build : builds) {
+    	          if (buildsLimits.in(nbBuildsToAnalyze)) {
+    	        	
+    	        	if (!buildsLimits.includedByStep(build.number)){
+    	          		continue;
+    	          	}  
+    	        	    
+    	            NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
+    	            PerformanceBuildAction performanceBuildAction = build.getAction(PerformanceBuildAction.class);
+    	            if (performanceBuildAction == null) {
+    	              continue;
+    	            }
+    	            PerformanceReport performanceReport = performanceBuildAction.getPerformanceReportMap().getPerformanceReport(
+    	                performanceReportNameFile);
+    	            if (performanceReport == null) {
+    	              nbBuildsToAnalyze--;
+    	              continue;
+    	            }
+    	            
+    	            dataSetBuilderAverage.add(performanceReport.getMedian(),
+    	                Messages.ProjectAction_Median(), label);
+    	           
+    	           
+    	          }
+    	          nbBuildsToAnalyze--;
+    	          continue;
+    	        }
+    	        ChartUtil.generateGraph(request, response,
+    	            createRespondingTimeChart(dataSetBuilderAverage.build()), 400, 200);
+    	  }
+    
+    
+    public void doRespondingTimeGraphMax(StaplerRequest request,
+    	      StaplerResponse response) throws IOException {
+    	    	PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+    	        request.bindParameters(performanceReportPosition);
+    	        String performanceReportNameFile = performanceReportPosition.getPerformanceReportPosition();
+    	        if (performanceReportNameFile == null) {
+    	          if (getPerformanceReportList().size() == 1) {
+    	            performanceReportNameFile = getPerformanceReportList().get(0);
+    	          } else {
+    	            return;
+    	          }
+    	        }
+    	        if (ChartUtil.awtProblemCause != null) {
+    	          // not available. send out error message
+    	          response.sendRedirect2(request.getContextPath() + "/images/headless.png");
+    	          return;
+    	        }
+    	        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+    	        List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();
+    	        Range buildsLimits = getFirstAndLastBuild(request, builds);
+
+    	        int nbBuildsToAnalyze = builds.size();
+    	        for (AbstractBuild<?, ?> build : builds) {
+    	          if (buildsLimits.in(nbBuildsToAnalyze)) {
+    	        	
+    	        	if (!buildsLimits.includedByStep(build.number)){
+    	          		continue;
+    	          	}  
+    	        	    
+    	            NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
+    	            PerformanceBuildAction performanceBuildAction = build.getAction(PerformanceBuildAction.class);
+    	            if (performanceBuildAction == null) {
+    	              continue;
+    	            }
+    	            PerformanceReport performanceReport = performanceBuildAction.getPerformanceReportMap().getPerformanceReport(
+    	                performanceReportNameFile);
+    	            if (performanceReport == null) {
+    	              nbBuildsToAnalyze--;
+    	              continue;
+    	            }
+    	            
+    	            
+    	            dataSetBuilderAverage.add(performanceReport.getMax(),
+    	                    Messages.ProjectAction_Maximum(), label);
+    	            
+    	           
+    	          }
+    	          nbBuildsToAnalyze--;
+    	          continue;
+    	        }
+    	        ChartUtil.generateGraph(request, response,
+    	            createRespondingTimeChart(dataSetBuilderAverage.build()), 400, 200);
+    	  }
+    
+    public void doRespondingTimeGraphPercentile10(StaplerRequest request,
+    	      StaplerResponse response) throws IOException {
+    	    	PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+    	        request.bindParameters(performanceReportPosition);
+    	        String performanceReportNameFile = performanceReportPosition.getPerformanceReportPosition();
+    	        if (performanceReportNameFile == null) {
+    	          if (getPerformanceReportList().size() == 1) {
+    	            performanceReportNameFile = getPerformanceReportList().get(0);
+    	          } else {
+    	            return;
+    	          }
+    	        }
+    	        if (ChartUtil.awtProblemCause != null) {
+    	          // not available. send out error message
+    	          response.sendRedirect2(request.getContextPath() + "/images/headless.png");
+    	          return;
+    	        }
+    	        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+    	        List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();
+    	        Range buildsLimits = getFirstAndLastBuild(request, builds);
+
+    	        int nbBuildsToAnalyze = builds.size();
+    	        for (AbstractBuild<?, ?> build : builds) {
+    	          if (buildsLimits.in(nbBuildsToAnalyze)) {
+    	        	
+    	        	if (!buildsLimits.includedByStep(build.number)){
+    	          		continue;
+    	          	}  
+    	        	    
+    	            NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
+    	            PerformanceBuildAction performanceBuildAction = build.getAction(PerformanceBuildAction.class);
+    	            if (performanceBuildAction == null) {
+    	              continue;
+    	            }
+    	            PerformanceReport performanceReport = performanceBuildAction.getPerformanceReportMap().getPerformanceReport(
+    	                performanceReportNameFile);
+    	            if (performanceReport == null) {
+    	              nbBuildsToAnalyze--;
+    	              continue;
+    	            }
+    	            
+    	            
+    	            dataSetBuilderAverage.add(performanceReport.get10Percentile(),
+    	                    Messages.ProjectAction_Line10(), label);
+    	            
+    	           
+    	          }
+    	          nbBuildsToAnalyze--;
+    	          continue;
+    	        }
+    	        ChartUtil.generateGraph(request, response,
+    	            createRespondingTimeChart(dataSetBuilderAverage.build()), 400, 200);
+    	  }
+
+    public void doRespondingTimeGraphPercentile90(StaplerRequest request,
+    	      StaplerResponse response) throws IOException {
+    	    	PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+    	        request.bindParameters(performanceReportPosition);
+    	        String performanceReportNameFile = performanceReportPosition.getPerformanceReportPosition();
+    	        if (performanceReportNameFile == null) {
+    	          if (getPerformanceReportList().size() == 1) {
+    	            performanceReportNameFile = getPerformanceReportList().get(0);
+    	          } else {
+    	            return;
+    	          }
+    	        }
+    	        if (ChartUtil.awtProblemCause != null) {
+    	          // not available. send out error message
+    	          response.sendRedirect2(request.getContextPath() + "/images/headless.png");
+    	          return;
+    	        }
+    	        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+    	        List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();
+    	        Range buildsLimits = getFirstAndLastBuild(request, builds);
+
+    	        int nbBuildsToAnalyze = builds.size();
+    	        for (AbstractBuild<?, ?> build : builds) {
+    	          if (buildsLimits.in(nbBuildsToAnalyze)) {
+    	        	
+    	        	if (!buildsLimits.includedByStep(build.number)){
+    	          		continue;
+    	          	}  
+    	        	    
+    	            NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
+    	            PerformanceBuildAction performanceBuildAction = build.getAction(PerformanceBuildAction.class);
+    	            if (performanceBuildAction == null) {
+    	              continue;
+    	            }
+    	            PerformanceReport performanceReport = performanceBuildAction.getPerformanceReportMap().getPerformanceReport(
+    	                performanceReportNameFile);
+    	            if (performanceReport == null) {
+    	              nbBuildsToAnalyze--;
+    	              continue;
+    	            }
+    	            
+    	            
+    	            dataSetBuilderAverage.add(performanceReport.get90Percentile(),
+    	                    Messages.ProjectAction_Line90(), label);
+    	           
+    	          }
+    	          nbBuildsToAnalyze--;
+    	          continue;
+    	        }
+    	        ChartUtil.generateGraph(request, response,
+    	            createRespondingTimeChart(dataSetBuilderAverage.build()), 400, 200);
+    	  }
+    
+    public void doRespondingTimeGraph(StaplerRequest request,
+    	      StaplerResponse response) throws IOException {
+    	    	PerformanceReportPosition performanceReportPosition = new PerformanceReportPosition();
+    	        request.bindParameters(performanceReportPosition);
+    	        String performanceReportNameFile = performanceReportPosition.getPerformanceReportPosition();
+    	        if (performanceReportNameFile == null) {
+    	          if (getPerformanceReportList().size() == 1) {
+    	            performanceReportNameFile = getPerformanceReportList().get(0);
+    	          } else {
+    	            return;
+    	          }
+    	        }
+    	        if (ChartUtil.awtProblemCause != null) {
+    	          // not available. send out error message
+    	          response.sendRedirect2(request.getContextPath() + "/images/headless.png");
+    	          return;
+    	        }
+    	        DataSetBuilder<String, NumberOnlyBuildLabel> dataSetBuilderAverage = new DataSetBuilder<String, NumberOnlyBuildLabel>();
+    	        List<? extends AbstractBuild<?, ?>> builds = getProject().getBuilds();
+    	        Range buildsLimits = getFirstAndLastBuild(request, builds);
+
+    	        int nbBuildsToAnalyze = builds.size();
+    	        for (AbstractBuild<?, ?> build : builds) {
+    	          if (buildsLimits.in(nbBuildsToAnalyze)) {
+    	        	
+    	        	if (!buildsLimits.includedByStep(build.number)){
+    	          		continue;
+    	          	}  
+    	        	    
+    	            NumberOnlyBuildLabel label = new NumberOnlyBuildLabel(build);
+    	            PerformanceBuildAction performanceBuildAction = build.getAction(PerformanceBuildAction.class);
+    	            if (performanceBuildAction == null) {
+    	              continue;
+    	            }
+    	            PerformanceReport performanceReport = performanceBuildAction.getPerformanceReportMap().getPerformanceReport(
+    	                performanceReportNameFile);
+    	            if (performanceReport == null) {
+    	              nbBuildsToAnalyze--;
+    	              continue;
+    	            }
+    	            
+    	            dataSetBuilderAverage.add(performanceReport.getMedian(),
+    	                Messages.ProjectAction_Median(), label);
+    	            dataSetBuilderAverage.add(performanceReport.getMax(),
+    	                    Messages.ProjectAction_Maximum(), label);
+    	            dataSetBuilderAverage.add(performanceReport.getMin(),
+    	                    Messages.ProjectAction_Minimum(), label);
+    	            dataSetBuilderAverage.add(performanceReport.get10Percentile(),
+    	                    Messages.ProjectAction_Line10(), label);
+    	            dataSetBuilderAverage.add(performanceReport.get90Percentile(),
+    	                    Messages.ProjectAction_Line90(), label);
+    	           
+    	          }
+    	          nbBuildsToAnalyze--;
+    	          continue;
+    	        }
+    	        ChartUtil.generateGraph(request, response,
+    	            createRespondingTimeChart(dataSetBuilderAverage.build()), 400, 200);
+    	  }
+    
     
     public void doRespondingTimeGraphMatrix(StaplerRequest request,
     	      StaplerResponse response) throws IOException {
@@ -217,6 +494,14 @@ public final class SlingPerformanceProjectAction implements Action {
     		
     		dataSetBuilderAverage.add(performanceReport.getMedian(),
     	                Messages.ProjectAction_Median(), config.getDisplayName());
+    		dataSetBuilderAverage.add(performanceReport.getMax(),
+                    Messages.ProjectAction_Maximum(), config.getDisplayName());
+            dataSetBuilderAverage.add(performanceReport.getMin(),
+                    Messages.ProjectAction_Minimum(), config.getDisplayName());
+            dataSetBuilderAverage.add(performanceReport.get10Percentile(),
+                    Messages.ProjectAction_Line10(), config.getDisplayName());
+            dataSetBuilderAverage.add(performanceReport.get90Percentile(),
+                    Messages.ProjectAction_Line90(), config.getDisplayName());
     	           
     	}
     	
@@ -485,6 +770,10 @@ public final class SlingPerformanceProjectAction implements Action {
             Messages.ProjectAction_Minimum(), label);
         dataSet.add(Math.round(report.getMax()),
             Messages.ProjectAction_Maximum(), label);
+        dataSet.add(Math.round(report.get10Percentile()),
+                Messages.ProjectAction_Line10(), label);
+        dataSet.add(Math.round(report.get90Percentile()),
+                Messages.ProjectAction_Line90(), label);
         }
       nbBuildsToAnalyze--;
     }

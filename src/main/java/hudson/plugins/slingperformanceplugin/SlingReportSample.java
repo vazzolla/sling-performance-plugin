@@ -7,6 +7,10 @@ import java.util.Date;
  */
 public class SlingReportSample implements Comparable<SlingReportSample> {
 	
+	private long percentile10;
+	
+	private long percentile90;
+	
 	private long median;
 	
 	private long min;
@@ -31,6 +35,14 @@ public class SlingReportSample implements Comparable<SlingReportSample> {
 
 	public long getMax(){
 		return max;
+	}
+	
+	public long get10Percentile(){
+		return percentile10;
+	}
+
+	public long get90Percentile(){
+		return percentile90;
 	}
 	
 	public Date getDate() {
@@ -72,6 +84,15 @@ public class SlingReportSample implements Comparable<SlingReportSample> {
 	public void setMax(long max){
 		this.max = max;
 	}
+	
+	public void set10Percentile(long percentile10) {
+		this.percentile10 = percentile10;
+	}
+	
+	public void set90Percentile(long percentile90) {
+		this.percentile90 = percentile90;
+	}
+	
 
 	public void setSuccessful(boolean successful) {
 		this.successful = successful;

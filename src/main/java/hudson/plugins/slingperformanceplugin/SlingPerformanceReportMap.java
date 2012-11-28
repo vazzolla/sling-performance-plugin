@@ -194,6 +194,14 @@ public class SlingPerformanceReportMap implements ModelObject {
     	return getPerformanceReport(performanceReportName).getMax();
     }
     
+    public long getReport10Percentile(String performanceReportName){
+    	return getPerformanceReport(performanceReportName).get10Percentile();
+    }
+    
+    public long getReport90Percentile(String performanceReportName){
+    	return getPerformanceReport(performanceReportName).get90Percentile();
+    }
+    
     private void parseReports(AbstractBuild<?, ?> build, TaskListener listener, PerformanceReportCollector collector, final String filename) throws IOException {
         File repo = new File(build.getRootDir(),
                 SlingPerformanceReportMap.getPerformanceReportDirRelativePath());    

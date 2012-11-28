@@ -10,6 +10,8 @@
          <h4>Median: ${it.getReportMedian(performanceReport.getReportFileName())}</h4>
          <h4>Min:${it.getReportMin(performanceReport.getReportFileName())}</h4>
          <h4>Max: ${it.getReportMax(performanceReport.getReportFileName())}</h4>
+         <h4>Percentile 10%:${it.getReport10Percentile(performanceReport.getReportFileName())}</h4>
+         <h4>Percentile 90%: ${it.getReport90Percentile(performanceReport.getReportFileName())}</h4>
          <hr/>
       </j:forEach> 
     </l:main-panel>

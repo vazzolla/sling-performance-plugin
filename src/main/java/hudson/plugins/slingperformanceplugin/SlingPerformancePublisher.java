@@ -30,7 +30,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class SlingPerformancePublisher extends Recorder {
   
 	@Extension
-	public static class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+	public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 		
 		public DescriptorImpl() {
 			super(SlingPerformancePublisher.class);

@@ -24,7 +24,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class SlingTextFormatReportParser extends GenericReportParser {
 	
 	@Extension
-	public static class DescriptorImpl extends PerformanceReportParserDescriptor {
+	public static final class DescriptorImpl extends PerformanceReportParserDescriptor {
 	
 		@Override
 	    public String getDisplayName() {
@@ -79,6 +79,8 @@ public class SlingTextFormatReportParser extends GenericReportParser {
 						sample.setMedian(Long.valueOf(results[6].trim()));
 						sample.setMin(Long.valueOf(results[4].trim()));
 						sample.setMax(Long.valueOf(results[8].trim()));
+						sample.set10Percentile(Long.valueOf(results[5].trim()));
+						sample.set90Percentile(Long.valueOf(results[7].trim()));
 						
 						sample.setSuccessful(true);
 						sample.setTestName(results[1].trim());

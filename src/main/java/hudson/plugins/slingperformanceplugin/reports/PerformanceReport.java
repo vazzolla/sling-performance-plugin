@@ -89,6 +89,14 @@ public class PerformanceReport extends AbstractReport implements
   public long getMin() {
     return this.reportSample.getMin();
   }
+  
+  public long get10Percentile() {
+	  return this.reportSample.get10Percentile();
+  }
+
+  public long get90Percentile() {
+    return this.reportSample.get90Percentile();
+  }
 
   public String getReportFileName() {
     return reportFileName;
